@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>聖經 · 和合本</title>
+
+  <!-- 引入 Google Fonts：思源宋體 + 古典英文字體 EB Garamond -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&family=Noto+Serif+TC:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- 頂部輕量導航列 -->
+  <nav class="navbar">
+    <div class="nav-brand">和合本</div>
+    <div class="nav-controls">
+      <select id="bookSelector" aria-label="選擇書卷"></select>
+      <select id="chapterSelector" aria-label="選擇章節"></select>
+    </div>
+  </nav>
+
+  <!-- 閱讀核心容器 -->
+  <main class="reader-container">
+    <header class="chapter-header">
+      <h1 id="displayBookTitle" class="book-title">加載中...</h1>
+      <div id="displayChapterEn" class="chapter-subtitle"></div>
+    </header>
+
+    <!-- 經文顯示區 -->
+    <article id="scriptureContent" class="scripture-content">
+      <!-- 經文會由 JS 動態塞進來 -->
+    </article>
+
+    <!-- 底部切換章節按鈕 -->
+    <footer class="chapter-pagination">
+      <button id="prevBtn" class="page-btn">上一章</button>
+      <button id="nextBtn" class="page-btn">下一章</button>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

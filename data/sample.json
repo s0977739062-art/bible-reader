@@ -1,0 +1,28 @@
+[
+  {
+    "bookId": "GEN",
+    "bookName": "創世記",
+    "bookNameEn": "Genesis",
+    "chapter": 1,
+    "verses": [
+      { "verse": 1, "text": "起初， 神創造天地。" },
+      { "verse": 2, "text": "地是空虛混沌，淵面黑暗； 神的靈運行在水面上。" },
+      { "verse": 3, "text": " 神說：「要有光」，就有了光。" },
+      { "verse": 4, "text": " 神看光是好的，就把光暗分開了。" },
+      { "verse": 5, "text": " 神稱光為晝，稱暗為夜。有晚上，有早晨，這是頭一日。" }
+    ]
+  },
+  {
+    "bookId": "JHN",
+    "bookName": "約翰福音",
+    "bookNameEn": "John",
+    "chapter": 1,
+    "verses": [
+      { "verse": 1, "text": "太初有道，道與 神同在，道就是 神。" },
+      { "verse": 2, "text": "這道太初與 神同在。" },
+      { "verse": 3, "text": "萬物是藉著他造的；凡被造的，沒有一樣不是藉著他造的。" },
+      { "verse": 4, "text": "生命在他裡頭，這生命就是人的光。" },
+      { "verse": 5, "text": "光照在黑暗裡，黑暗卻不接受光。" }
+    ]
+  }
+]

@@ -1,0 +1,146 @@
+:root {
+  --bg-primary: #FAF7F2;      /* 暖米紙底色 */
+  --text-main: #242220;       /* 沉靜深墨黑 */
+  --text-muted: #8E8A85;      /* 節號、次要文字 */
+  --accent: #9E5B32;          /* 典雅紅褐色 */
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --font-serif: 'Noto Serif TC', serif;
+  --font-en: 'EB Garamond', serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--font-serif);
+  line-height: 2.1;
+  letter-spacing: 0.05em;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 頂部導航 */
+.navbar {
+  width: 100%;
+  max-width: 800px;
+  padding: 24px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.nav-brand {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--text-main);
+}
+
+.nav-controls select {
+  font-family: var(--font-serif);
+  padding: 6px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  background-color: #FFFFFF;
+  color: var(--text-main);
+  font-size: 0.95rem;
+  outline: none;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+/* 閱讀主區域 */
+.reader-container {
+  width: 100%;
+  max-width: 680px; /* 黃金閱讀行寬 */
+  padding: 60px 24px 100px;
+  flex: 1;
+}
+
+.chapter-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.book-title {
+  font-size: 2.2rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  margin-bottom: 6px;
+}
+
+.chapter-subtitle {
+  font-family: var(--font-en);
+  font-size: 1.15rem;
+  color: var(--accent);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+/* 經文文字 */
+.scripture-content {
+  font-size: 1.125rem;
+  text-align: justify;
+}
+
+.verse {
+  display: block;
+  margin-bottom: 0.9rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.verse:hover {
+  background-color: rgba(0, 0, 0, 0.025);
+}
+
+.verse-num {
+  font-family: var(--font-en);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  vertical-align: super;
+  margin-right: 8px;
+  user-select: none;
+}
+
+/* 底部換頁按鈕 */
+.chapter-pagination {
+  margin-top: 60px;
+  padding-top: 30px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+}
+
+.page-btn {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  padding: 8px 18px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: var(--text-main);
+  color: #FFFFFF;
+}
+
+.page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
