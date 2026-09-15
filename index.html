@@ -2,24 +2,36 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>聖經 · 和合本</title>
 
-  <!-- 引入 Google Fonts：思源宋體 + 古典英文字體 EB Garamond -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&family=Noto+Serif+TC:wght@300;400;600&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- 頂部輕量導航列 -->
+  <!-- 頂部導航列 -->
   <nav class="navbar">
     <div class="nav-brand">和合本</div>
+    
+    <div class="nav-center">
+      <div class="search-bar-container">
+        <span class="search-icon">⚲</span>
+        <input type="text" id="directSearchInput" placeholder="檢索經文..." autocomplete="off" />
+        <div id="quickSearchResults" class="quick-search-dropdown hidden"></div>
+      </div>
+    </div>
+
     <div class="nav-controls">
-      <select id="bookSelector" aria-label="選擇書卷"></select>
-      <select id="chapterSelector" aria-label="選擇章節"></select>
+      <div class="selector-group">
+        <select id="bookSelector" aria-label="選擇書卷"></select>
+        <select id="chapterSelector" aria-label="選擇章節"></select>
+      </div>
+      <button id="themeToggleBtn" class="theme-icon-btn" title="切換日夜模式">
+        <span class="theme-mode-indicator"></span>
+      </button>
     </div>
   </nav>
 
@@ -30,17 +42,39 @@
       <div id="displayChapterEn" class="chapter-subtitle"></div>
     </header>
 
-    <!-- 經文顯示區 -->
-    <article id="scriptureContent" class="scripture-content">
-      <!-- 經文會由 JS 動態塞進來 -->
-    </article>
+    <article id="scriptureContent" class="scripture-content"></article>
 
-    <!-- 底部切換章節按鈕 -->
     <footer class="chapter-pagination">
       <button id="prevBtn" class="page-btn">上一章</button>
       <button id="nextBtn" class="page-btn">下一章</button>
     </footer>
   </main>
+
+  <!-- 劃線 / 複製 / 筆記 浮動工具列 -->
+  <div id="verseToolbar" class="verse-toolbar hidden">
+    <button id="highlightBtn" class="tb-btn">🖍️ 劃線</button>
+    <button id="noteBtn" class="tb-btn">📝 筆記</button>
+    <button id="copyVerseBtn" class="tb-btn">📋 複製</button>
+  </div>
+
+  <!-- 筆記編輯彈窗 (Note Modal) -->
+  <div id="noteModal" class="note-modal hidden">
+    <div class="note-modal-backdrop" id="noteBackdrop"></div>
+    <div class="note-modal-content">
+      <div class="note-header">
+        <div id="noteVerseRef" class="note-title">經文筆記</div>
+        <button id="noteCloseBtn" class="modal-close-btn">&times;</button>
+      </div>
+      <textarea id="noteInput" placeholder="寫下這節經文的感動或心得..." rows="4"></textarea>
+      <div class="note-footer">
+        <button id="deleteNoteBtn" class="note-action-btn delete-btn">刪除筆記</button>
+        <button id="saveNoteBtn" class="note-action-btn save-btn">儲存筆記</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 提示訊息 -->
+  <div id="toast" class="toast hidden">已複製金句！</div>
 
   <script src="app.js"></script>
 </body>
