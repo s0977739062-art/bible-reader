@@ -7,7 +7,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&family=Noto+Serif+TC:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&family=Noto+Serif+TC:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -19,7 +19,7 @@
     <div class="nav-center">
       <div class="search-bar-container">
         <span class="search-icon">⚲</span>
-        <input type="text" id="directSearchInput" placeholder="檢索經文..." autocomplete="off" />
+        <input type="text" id="directSearchInput" placeholder="檢索經文（如：創22、太5:16、光）..." autocomplete="off" />
         <div id="quickSearchResults" class="quick-search-dropdown hidden"></div>
       </div>
     </div>
@@ -50,14 +50,15 @@
     </footer>
   </main>
 
-  <!-- 劃線 / 複製 / 筆記 浮動工具列 -->
+  <!-- 經文浮動工具列 -->
   <div id="verseToolbar" class="verse-toolbar hidden">
     <button id="highlightBtn" class="tb-btn">🖍️ 劃線</button>
     <button id="noteBtn" class="tb-btn">📝 筆記</button>
+    <button id="cardBtn" class="tb-btn">🖼️ 製圖</button>
     <button id="copyVerseBtn" class="tb-btn">📋 複製</button>
   </div>
 
-  <!-- 筆記編輯彈窗 (Note Modal) -->
+  <!-- 筆記彈窗 -->
   <div id="noteModal" class="note-modal hidden">
     <div class="note-modal-backdrop" id="noteBackdrop"></div>
     <div class="note-modal-content">
@@ -73,7 +74,48 @@
     </div>
   </div>
 
-  <!-- 提示訊息 -->
+  <!-- 經文金句卡設計彈窗 -->
+  <div id="cardModal" class="note-modal hidden">
+    <div class="note-modal-backdrop" id="cardBackdrop"></div>
+    <div class="note-modal-content card-modal-content">
+      <div class="note-header">
+        <div class="note-title">經文金句卡分享</div>
+        <button id="cardCloseBtn" class="modal-close-btn">&times;</button>
+      </div>
+
+      <!-- 卡片即時預覽區 -->
+      <div class="card-preview-wrapper">
+        <img id="cardPreviewImg" alt="金句卡片預覽" />
+      </div>
+
+      <!-- 風格選擇滑動列 -->
+      <div class="card-template-bar">
+        <div class="template-chips">
+          <button class="tpl-chip active" data-template="parchment">📜 羊皮紙</button>
+          <button class="tpl-chip" data-template="forest">🌲 山林曠野</button>
+          <button class="tpl-chip" data-template="sky">🌊 天際晴空</button>
+          <button class="tpl-chip" data-template="cyber">⚙️ 未來機械</button>
+          <button class="tpl-chip" data-template="midnight">🌑 午夜金輝</button>
+          <button class="tpl-chip" data-template="dawn">🌅 晨曦微光</button>
+          <button class="tpl-chip" data-template="olive">🌿 大地橄欖</button>
+          <label class="tpl-chip upload-chip">
+            📷 自訂背景
+            <input type="file" id="customBgInput" accept="image/*" style="display: none;" />
+          </label>
+        </div>
+      </div>
+
+      <!-- 操作按鈕列：分享與下載 -->
+      <div class="card-action-footer">
+        <button id="downloadCardBtn" class="note-action-btn secondary-btn">💾 存為圖片</button>
+        <button id="shareCardBtn" class="note-action-btn share-primary-btn">🚀 分享至群組</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 繪圖畫布 -->
+  <canvas id="cardCanvas" style="display: none;"></canvas>
+
   <div id="toast" class="toast hidden">已複製金句！</div>
 
   <script src="app.js"></script>

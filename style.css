@@ -34,8 +34,8 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-main);
   font-family: var(--font-serif);
-  line-height: 2.1;
-  letter-spacing: 0.05em;
+  line-height: 1.75;
+  letter-spacing: 0.03em;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -44,11 +44,11 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* 頂部導航 */
+/* 頂部導航列 */
 .navbar {
   width: 100%;
-  max-width: 860px;
-  padding: 16px 20px;
+  max-width: 960px;
+  padding: 14px 24px;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
@@ -62,7 +62,7 @@ body {
 }
 
 .nav-brand {
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 600;
   letter-spacing: 0.15em;
 }
@@ -76,15 +76,15 @@ body {
 .search-bar-container {
   position: relative;
   width: 100%;
-  max-width: 320px;
+  max-width: 360px;
 }
 
 .search-icon {
   position: absolute;
-  left: 12px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--text-muted);
   pointer-events: none;
 }
@@ -93,10 +93,10 @@ body {
   width: 100%;
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: 20px;
-  padding: 7px 16px 7px 34px;
+  border-radius: 24px;
+  padding: 8px 18px 8px 38px;
   font-family: var(--font-serif);
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   color: var(--text-main);
   outline: none;
   transition: all 0.2s ease;
@@ -104,7 +104,7 @@ body {
 
 #directSearchInput:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(158, 91, 50, 0.1);
+  box-shadow: 0 0 0 3px rgba(158, 91, 50, 0.12);
 }
 
 .quick-search-dropdown {
@@ -112,8 +112,8 @@ body {
   top: calc(100% + 8px);
   left: 0;
   width: 100%;
-  min-width: 300px;
-  max-height: 360px;
+  min-width: 320px;
+  max-height: 400px;
   overflow-y: auto;
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
@@ -124,7 +124,7 @@ body {
 }
 
 .quick-search-item {
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: 8px;
   cursor: pointer;
   border-bottom: 1px solid var(--border-subtle);
@@ -135,13 +135,14 @@ body {
 }
 
 .qs-title {
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   color: var(--accent);
   font-weight: 600;
+  margin-bottom: 2px;
 }
 
 .qs-text {
-  font-size: 0.85rem;
+  font-size: 0.92rem;
   line-height: 1.5;
   white-space: nowrap;
   overflow: hidden;
@@ -156,7 +157,7 @@ body {
 
 .selector-group {
   display: flex;
-  gap: 6px;
+  gap: 8px;
 }
 
 select {
@@ -165,8 +166,8 @@ select {
   color: var(--text-main);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 0.88rem;
+  padding: 7px 12px;
+  font-size: 0.92rem;
   outline: none;
   cursor: pointer;
 }
@@ -174,8 +175,8 @@ select {
 .theme-icon-btn {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -184,8 +185,8 @@ select {
 }
 
 .theme-mode-indicator {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #242220;
 }
@@ -197,20 +198,20 @@ body.dark-theme .theme-mode-indicator {
 /* 核心閱讀區 */
 .reader-container {
   width: 100%;
-  max-width: 680px;
-  padding: 48px 20px 80px;
+  max-width: 860px;
+  padding: 36px 24px 80px;
   flex: 1;
 }
 
 .chapter-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 
 .book-title {
-  font-size: 2.2rem;
+  font-size: 2.3rem;
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   margin-bottom: 4px;
 }
 
@@ -218,21 +219,28 @@ body.dark-theme .theme-mode-indicator {
   font-family: var(--font-en);
   font-size: 1.15rem;
   color: var(--accent);
-  letter-spacing: 0.22em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
 .scripture-content {
-  font-size: 1.125rem;
-  text-align: justify;
+  font-size: 1.5rem;
 }
 
+.verse-wrapper {
+  margin-bottom: 0.45rem;
+}
+
+/* 網格雙欄對齊 */
 .verse {
-  display: block;
-  margin-bottom: 0.85rem;
-  padding: 6px 8px;
+  display: grid !important;
+  grid-template-columns: 2.6rem 1fr;
+  column-gap: 12px;
+  align-items: start;
+  padding: 4px 8px;
   border-radius: 6px;
   cursor: pointer;
+  line-height: 1.75;
   transition: background-color 0.15s ease;
 }
 
@@ -240,32 +248,39 @@ body.dark-theme .theme-mode-indicator {
   background-color: var(--accent-light);
 }
 
-/* 劃線樣式 */
 .verse.highlighted {
   background-color: var(--highlight-bg);
-  border-left: 3px solid var(--accent);
-  padding-left: 10px;
+  border-left: 4px solid var(--accent);
+  padding-left: 8px;
 }
 
 .verse-num {
   font-family: var(--font-en);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  vertical-align: super;
-  margin-right: 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: right;
   user-select: none;
+  line-height: inherit;
+  margin: 0 !important;
+  display: block;
 }
 
-/* 筆記顯示便籤卡片 */
+.verse-text {
+  display: block;
+  text-align: justify;
+  line-height: inherit;
+  word-break: break-word;
+}
+
 .verse-note-badge {
   display: block;
-  margin: 6px 0 10px 18px;
-  padding: 6px 12px;
+  margin: 4px 0 10px calc(2.6rem + 12px) !important;
+  padding: 6px 14px;
   background-color: var(--note-card-bg);
-  border-left: 2px solid var(--accent);
-  border-radius: 4px;
-  font-size: 0.9rem;
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  font-size: 1.05rem;
   color: var(--text-main);
   line-height: 1.6;
   font-style: italic;
@@ -276,12 +291,12 @@ body.dark-theme .theme-mode-indicator {
 .verse-note-badge::before {
   content: '📝 ';
   font-style: normal;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 .chapter-pagination {
-  margin-top: 50px;
-  padding-top: 24px;
+  margin-top: 40px;
+  padding-top: 20px;
   border-top: 1px solid var(--border-subtle);
   display: flex;
   justify-content: space-between;
@@ -289,8 +304,8 @@ body.dark-theme .theme-mode-indicator {
 
 .page-btn {
   font-family: var(--font-serif);
-  font-size: 0.9rem;
-  padding: 8px 20px;
+  font-size: 0.95rem;
+  padding: 8px 22px;
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   background: var(--bg-surface);
@@ -338,9 +353,9 @@ body.dark-theme .theme-mode-indicator {
   background: transparent;
   border: none;
   font-family: var(--font-serif);
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   color: var(--text-main);
-  padding: 6px 10px;
+  padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
   white-space: nowrap;
@@ -351,7 +366,7 @@ body.dark-theme .theme-mode-indicator {
   color: var(--accent);
 }
 
-/* 筆記彈窗樣式 */
+/* 彈窗樣式 */
 .note-modal {
   position: fixed;
   inset: 0;
@@ -365,8 +380,8 @@ body.dark-theme .theme-mode-indicator {
 .note-modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(3px);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
 }
 
 .note-modal-content {
@@ -374,12 +389,90 @@ body.dark-theme .theme-mode-indicator {
   width: 100%;
   max-width: 480px;
   background: var(--bg-surface);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  padding: 18px 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* 卡片專用彈窗：自適應長寬 */
+.card-modal-content {
+  max-width: 470px;
+  max-height: 94vh;
+  overflow: hidden;
+}
+
+.card-preview-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4px 0;
+  min-height: 0;
+}
+
+#cardPreviewImg {
+  width: auto;
+  max-width: 100%;
+  max-height: 50vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.15);
+}
+
+/* 模板切換標籤列 */
+.card-template-bar {
+  width: 100%;
+  padding: 4px 0;
+}
+
+.template-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.template-chips::-webkit-scrollbar {
+  height: 4px;
+}
+
+.template-chips::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 2px;
+}
+
+.tpl-chip {
+  flex-shrink: 0;
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-primary);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tpl-chip:hover {
+  border-color: var(--accent);
+}
+
+.tpl-chip.active {
+  background: var(--accent);
+  color: #FFFFFF;
+  border-color: var(--accent);
+}
+
+.upload-chip {
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
 }
 
 .note-header {
@@ -389,7 +482,7 @@ body.dark-theme .theme-mode-indicator {
 }
 
 .note-title {
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: var(--accent);
 }
@@ -409,11 +502,11 @@ body.dark-theme .theme-mode-indicator {
   border-radius: 8px;
   padding: 12px;
   font-family: var(--font-serif);
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--text-main);
   outline: none;
   resize: vertical;
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 #noteInput:focus {
@@ -423,15 +516,50 @@ body.dark-theme .theme-mode-indicator {
 .note-footer {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+}
+
+/* 卡片分享按鈕列 */
+.card-action-footer {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 10px;
+  padding-top: 4px;
 }
 
 .note-action-btn {
   font-family: var(--font-serif);
-  font-size: 0.85rem;
-  padding: 6px 14px;
-  border-radius: 6px;
+  font-size: 0.92rem;
+  padding: 9px 16px;
+  border-radius: 8px;
   cursor: pointer;
   border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.secondary-btn {
+  background: var(--bg-primary);
+  border-color: var(--border-subtle);
+  color: var(--text-main);
+}
+
+.secondary-btn:hover {
+  background: var(--accent-light);
+}
+
+.share-primary-btn {
+  background: #2E7D32;
+  color: #FFFFFF;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.25);
+}
+
+.share-primary-btn:hover {
+  background: #256628;
 }
 
 .save-btn {
@@ -457,22 +585,22 @@ body.dark-theme .theme-mode-indicator {
   transform: translateX(-50%);
   background: rgba(30, 30, 32, 0.9);
   color: #FFFFFF;
-  padding: 8px 18px;
+  padding: 8px 20px;
   border-radius: 20px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   z-index: 300;
   box-shadow: var(--shadow);
 }
 
 .hidden { display: none !important; }
 
-/* 手機 RWD 排版 */
+/* 手機版 RWD */
 @media (max-width: 720px) {
   .navbar {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: 10px;
     padding: 12px 16px;
   }
 
@@ -503,15 +631,15 @@ body.dark-theme .theme-mode-indicator {
   .selector-group select {
     flex: 1;
     font-size: 0.9rem;
-    padding: 8px 6px;
+    padding: 7px 6px;
   }
 
   .reader-container {
-    padding: 24px 16px 80px;
+    padding: 20px 14px 60px;
   }
 
   .book-title {
-    font-size: 1.65rem;
+    font-size: 1.75rem;
   }
 
   .chapter-subtitle {
@@ -519,12 +647,20 @@ body.dark-theme .theme-mode-indicator {
   }
 
   .scripture-content {
-    font-size: 1.05rem;
-    line-height: 2.0;
+    font-size: 1.25rem;
   }
 
   .verse {
-    margin-bottom: 0.75rem;
-    padding: 6px 6px;
+    grid-template-columns: 2.2rem 1fr;
+    column-gap: 8px;
+    padding: 4px 6px;
+  }
+
+  .verse-num {
+    font-size: 0.9rem;
+  }
+
+  .verse-note-badge {
+    margin-left: calc(2.2rem + 8px) !important;
   }
 }
