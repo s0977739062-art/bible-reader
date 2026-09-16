@@ -32,10 +32,10 @@
         <select id="chapterSelector" aria-label="選擇章節"></select>
         <!-- 宣教雙語語言切換 -->
         <select id="parallelLangSelector" aria-label="對照語言" title="宣教對照語言">
-          <option value="none">單語 (繁中)</option>
-          <option value="id">🇮🇩 印尼文 (TB)</option>
-          <option value="en">🇺🇸 英文 (KJV)</option>
-          <option value="vi">🇻🇳 越南文 (1925)</option>
+          <option value="none">繁中</option>
+          <option value="id">印尼文 (TB)</option>
+          <option value="en">英文 (KJV)</option>
+          <option value="vi">越南文 (1925)</option>
         </select>
       </div>
       <button id="themeToggleBtn" class="theme-icon-btn" title="切換日夜模式">
@@ -58,6 +58,11 @@
       <button id="nextBtn" class="page-btn">下一章</button>
     </footer>
   </main>
+
+    <div class="floating-pagination" aria-label="快速翻頁">
+      <button id="floatingPrevBtn" class="floating-page-btn" type="button" aria-label="上一章" title="上一章">←</button>
+      <button id="floatingNextBtn" class="floating-page-btn" type="button" aria-label="下一章" title="下一章">→</button>
+    </div>
 
   <!-- 經文浮動工具列 -->
   <div id="verseToolbar" class="verse-toolbar hidden">

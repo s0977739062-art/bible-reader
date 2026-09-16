@@ -25,6 +25,8 @@ const displayChapterEn = document.getElementById('displayChapterEn');
 const scriptureContent = document.getElementById('scriptureContent');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
+const floatingPrevBtn = document.getElementById('floatingPrevBtn');
+const floatingNextBtn = document.getElementById('floatingNextBtn');
 const themeToggleBtn = document.getElementById('themeToggleBtn');
 const parallelLangSelector = document.getElementById('parallelLangSelector');
 
@@ -190,6 +192,8 @@ function loadChapter(bookIdx, chapNum) {
 
   prevBtn.disabled = (currentBookIndex === 0 && currentChapter === 1);
   nextBtn.disabled = (currentBookIndex === booksMeta.length - 1 && currentChapter === currentBook.chapters);
+  floatingPrevBtn.disabled = prevBtn.disabled;
+  floatingNextBtn.disabled = nextBtn.disabled;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -834,5 +838,8 @@ nextBtn.addEventListener('click', () => {
     loadChapter(currentBookIndex + 1, 1);
   }
 });
+
+floatingPrevBtn.addEventListener('click', () => prevBtn.click());
+floatingNextBtn.addEventListener('click', () => nextBtn.click());
 
 init();
