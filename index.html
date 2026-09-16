@@ -3,23 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>聖經 · 和合本</title>
+  <title>高雄錫安堂聖經</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..600;1,400..600&family=Noto+Serif+TC:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#8E5A36">
 </head>
 <body>
 
   <!-- 頂部導航列 -->
   <nav class="navbar">
-    <div class="nav-brand">和合本</div>
+    <div class="nav-brand">聖經BIBLE</div>
     
     <div class="nav-center">
       <div class="search-bar-container">
         <span class="search-icon">⚲</span>
-        <input type="text" id="directSearchInput" placeholder="檢索經文（如：創22、太5:16、光）..." autocomplete="off" />
+        <input type="text" id="directSearchInput" placeholder="檢索經文（如：創22、太5:16）..." autocomplete="off" />
         <div id="quickSearchResults" class="quick-search-dropdown hidden"></div>
       </div>
     </div>
@@ -28,6 +30,13 @@
       <div class="selector-group">
         <select id="bookSelector" aria-label="選擇書卷"></select>
         <select id="chapterSelector" aria-label="選擇章節"></select>
+        <!-- 宣教雙語語言切換 -->
+        <select id="parallelLangSelector" aria-label="對照語言" title="宣教對照語言">
+          <option value="none">單語 (繁中)</option>
+          <option value="id">🇮🇩 印尼文 (TB)</option>
+          <option value="en">🇺🇸 英文 (KJV)</option>
+          <option value="vi">🇻🇳 越南文 (1925)</option>
+        </select>
       </div>
       <button id="themeToggleBtn" class="theme-icon-btn" title="切換日夜模式">
         <span class="theme-mode-indicator"></span>
@@ -36,7 +45,7 @@
   </nav>
 
   <!-- 閱讀核心容器 -->
-  <main class="reader-container">
+  <main class="reader-container" id="readerContainer">
     <header class="chapter-header">
       <h1 id="displayBookTitle" class="book-title">加載中...</h1>
       <div id="displayChapterEn" class="chapter-subtitle"></div>
@@ -52,6 +61,7 @@
 
   <!-- 經文浮動工具列 -->
   <div id="verseToolbar" class="verse-toolbar hidden">
+    <button id="speakBtn" class="toolbar-btn">🔊 朗讀</button>
     <button id="highlightBtn" class="tb-btn">🖍️ 劃線</button>
     <button id="noteBtn" class="tb-btn">📝 筆記</button>
     <button id="cardBtn" class="tb-btn">🖼️ 製圖</button>
@@ -83,12 +93,10 @@
         <button id="cardCloseBtn" class="modal-close-btn">&times;</button>
       </div>
 
-      <!-- 卡片即時預覽區 -->
       <div class="card-preview-wrapper">
         <img id="cardPreviewImg" alt="金句卡片預覽" />
       </div>
 
-      <!-- 風格選擇滑動列 -->
       <div class="card-template-bar">
         <div class="template-chips">
           <button class="tpl-chip active" data-template="parchment">📜 羊皮紙</button>
@@ -105,7 +113,6 @@
         </div>
       </div>
 
-      <!-- 操作按鈕列：分享與下載 -->
       <div class="card-action-footer">
         <button id="downloadCardBtn" class="note-action-btn secondary-btn">💾 存為圖片</button>
         <button id="shareCardBtn" class="note-action-btn share-primary-btn">🚀 分享至群組</button>

@@ -47,7 +47,7 @@ body {
 /* 頂部導航列 */
 .navbar {
   width: 100%;
-  max-width: 960px;
+  max-width: 1100px;
   padding: 14px 24px;
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -76,7 +76,7 @@ body {
 .search-bar-container {
   position: relative;
   width: 100%;
-  max-width: 360px;
+  max-width: 340px;
 }
 
 .search-icon {
@@ -96,7 +96,7 @@ body {
   border-radius: 24px;
   padding: 8px 18px 8px 38px;
   font-family: var(--font-serif);
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: var(--text-main);
   outline: none;
   transition: all 0.2s ease;
@@ -152,12 +152,12 @@ body {
 .nav-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .selector-group {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 select {
@@ -166,10 +166,16 @@ select {
   color: var(--text-main);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
-  padding: 7px 12px;
-  font-size: 0.92rem;
+  padding: 7px 10px;
+  font-size: 0.9rem;
   outline: none;
   cursor: pointer;
+}
+
+#parallelLangSelector {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .theme-icon-btn {
@@ -201,6 +207,12 @@ body.dark-theme .theme-mode-indicator {
   max-width: 860px;
   padding: 36px 24px 80px;
   flex: 1;
+  transition: max-width 0.3s ease;
+}
+
+/* 開啟雙語對照模式時，自動擴展容器適合投影與並排 */
+.reader-container.parallel-mode {
+  max-width: 1180px;
 }
 
 .chapter-header {
@@ -228,20 +240,26 @@ body.dark-theme .theme-mode-indicator {
 }
 
 .verse-wrapper {
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.55rem;
 }
 
-/* 網格雙欄對齊 */
+/* 單語模式下的 Grid 網格 */
 .verse {
   display: grid !important;
   grid-template-columns: 2.6rem 1fr;
   column-gap: 12px;
   align-items: start;
-  padding: 4px 8px;
+  padding: 6px 8px;
   border-radius: 6px;
   cursor: pointer;
   line-height: 1.75;
   transition: background-color 0.15s ease;
+}
+
+/* 宣教雙語對照模式：左右對分欄（左中文、右外文） */
+.parallel-mode .verse {
+  grid-template-columns: 2.6rem 1fr 1fr;
+  column-gap: 18px;
 }
 
 .verse:hover {
@@ -271,6 +289,20 @@ body.dark-theme .theme-mode-indicator {
   text-align: justify;
   line-height: inherit;
   word-break: break-word;
+}
+
+/* 對照外語文字樣式：使用 Garamond 經典字體，帶微次要深色 */
+.verse-text-foreign {
+  display: block;
+  font-family: var(--font-en), serif;
+  font-size: 1.35rem;
+  line-height: 1.6;
+  color: var(--text-main);
+  opacity: 0.88;
+  text-align: justify;
+  word-break: break-word;
+  border-left: 1px solid var(--border-subtle);
+  padding-left: 14px;
 }
 
 .verse-note-badge {
@@ -397,7 +429,6 @@ body.dark-theme .theme-mode-indicator {
   gap: 12px;
 }
 
-/* 卡片專用彈窗：自適應長寬 */
 .card-modal-content {
   max-width: 470px;
   max-height: 94vh;
@@ -422,7 +453,6 @@ body.dark-theme .theme-mode-indicator {
   box-shadow: 0 6px 22px rgba(0, 0, 0, 0.15);
 }
 
-/* 模板切換標籤列 */
 .card-template-bar {
   width: 100%;
   padding: 4px 0;
@@ -519,7 +549,6 @@ body.dark-theme .theme-mode-indicator {
   align-items: center;
 }
 
-/* 卡片分享按鈕列 */
 .card-action-footer {
   display: grid;
   grid-template-columns: 1fr 1.3fr;
@@ -594,8 +623,8 @@ body.dark-theme .theme-mode-indicator {
 
 .hidden { display: none !important; }
 
-/* 手機版 RWD */
-@media (max-width: 720px) {
+/* 手機版 RWD 排版 */
+@media (max-width: 768px) {
   .navbar {
     display: flex;
     flex-direction: column;
@@ -626,12 +655,14 @@ body.dark-theme .theme-mode-indicator {
 
   .selector-group {
     flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr;
+    gap: 4px;
   }
 
   .selector-group select {
-    flex: 1;
-    font-size: 0.9rem;
-    padding: 7px 6px;
+    font-size: 0.85rem;
+    padding: 6px 4px;
   }
 
   .reader-container {
@@ -650,17 +681,119 @@ body.dark-theme .theme-mode-indicator {
     font-size: 1.25rem;
   }
 
-  .verse {
-    grid-template-columns: 2.2rem 1fr;
-    column-gap: 8px;
-    padding: 4px 6px;
+  /* 手機版雙語對照：自動切換為上下排版 */
+  .parallel-mode .verse {
+    grid-template-columns: 2rem 1fr;
+    row-gap: 4px;
   }
 
   .verse-num {
     font-size: 0.9rem;
   }
 
+  .verse-text-foreign {
+    grid-column: 2;
+    border-left: none;
+    padding-left: 0;
+    margin-top: 4px;
+    font-size: 1.1rem;
+    color: var(--accent);
+  }
+
   .verse-note-badge {
-    margin-left: calc(2.2rem + 8px) !important;
+    margin-left: calc(2rem + 8px) !important;
+  }
+}
+/* 手機版導航與控制列自適應調整 */
+@media (max-width: 600px) {
+  /* 讓導航列在手機上可以自動折行或縮小邊距 */
+  .navbar {
+    padding: 8px 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* 控制群組（三個下拉選單 + 深色切換按鈕） */
+  .nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 100%;
+  }
+
+  /* 稍微縮小手機上的下拉選單內距與字體，避免擠壓 */
+  .nav-controls select {
+    padding: 4px 6px;
+    font-size: 0.85rem;
+  }
+
+  /* 語言選單寬度限制，避免字太長把按鈕頂出去 */
+  #langSelect {
+    max-width: 110px;
+  }
+
+ /* 強制將切換主題圓鈕鎖在右上角，不受任何選單推擠 */
+@media (max-width: 600px) {
+  /* 確保頂部導航有足夠高度與右側留白給圓鈕 */
+  .navbar {
+    position: relative !important;
+    padding-right: 48px !important; /* 留出右側空間給圓圈 */
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  /* 找到那顆圓圈按鈕（相容 id 或 class） */
+  #themeToggleBtn,
+  .theme-toggle,
+  .mode-toggle,
+  button[title*="模式"],
+  button[title*="主題"] {
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    display: block !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    border-radius: 50% !important;
+    z-index: 999 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* 下拉選單自適應寬度，不超出螢幕 */
+  select {
+    max-width: 28vw !important;
+    font-size: 0.8rem !important;
+  }
+}
+/* 手機版經文閱讀區左右留白最佳化 */
+@media (max-width: 600px) {
+  /* 縮小主容器左右兩側的內距 */
+  #readerContainer,
+  .reader-container,
+  .content-container,
+  main {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 縮小經文行（.verse）本身的左邊距或縮排 */
+  .verse {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    gap: 8px !important; /* 節號與經文之間的間距 */
+  }
+
+  /* 節號固定寬度並緊貼左側 */
+  .verse-num {
+    min-width: 20px !important;
+    text-align: right !important;
+    margin-right: 4px !important;
   }
 }
