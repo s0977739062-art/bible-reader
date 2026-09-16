@@ -36,6 +36,7 @@ const verseToolbar = document.getElementById('verseToolbar');
 const highlightBtn = document.getElementById('highlightBtn');
 const noteBtn = document.getElementById('noteBtn');
 const cardBtn = document.getElementById('cardBtn');
+const speakBtn = document.getElementById('speakBtn');
 const toast = document.getElementById('toast');
 
 // 筆記 Modal
@@ -136,7 +137,7 @@ function updateChapterSelector(totalChapters, selectedChapter) {
 }
 
 // 3. 讀取並渲染章節經文
-function loadChapter(bookIdx, chapNum) {
+function loadChapter(bookIdx, chapNum, verseNum = null) {
   currentBookIndex = bookIdx;
   currentChapter = chapNum;
   hideToolbar();
@@ -151,6 +152,7 @@ function loadChapter(bookIdx, chapNum) {
   const targetId = currentBook.id.toLowerCase();
   const selectedLanguage = parallelLangSelector.value;
   const selectedTranslation = parallelBibleData[selectedLanguage] || [];
+  speakBtn.classList.toggle('hidden', selectedLanguage === 'none');
   document.body.classList.toggle('parallel-mode', selectedLanguage !== 'none');
   const chapterVerses = fullBibleData.filter(item => {
     if (!item) return false;
@@ -195,6 +197,13 @@ function loadChapter(bookIdx, chapNum) {
   floatingPrevBtn.disabled = prevBtn.disabled;
   floatingNextBtn.disabled = nextBtn.disabled;
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (verseNum) {
+    setTimeout(() => {
+      const targetVerse = scriptureContent.querySelector(`.verse[data-verse="${verseNum}"]`);
+      targetVerse?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 250);
+  }
 }
 
 // 4. 經文操作浮動選單
@@ -256,6 +265,55 @@ function setupVerseActions() {
     }
     localStorage.setItem('bible_highlights', JSON.stringify(highlights));
     hideToolbar();
+  });
+
+  speakBtn.addEventListener('click', () => {
+    if (!selectedVerseData || !('speechSynthesis' in window)) {
+      showToast('此瀏覽器不支援朗讀功能');
+      return;
+    }
+
+    const selectedLanguage = parallelLangSelector.value;
+    if (selectedLanguage === 'none') {
+      showToast('請先選擇外文版本');
+      return;
+    }
+
+    const selectedTranslation = parallelBibleData[selectedLanguage] || [];
+    const foreignVerse = selectedTranslation.find(item => {
+      const itemBook = String(item.book || '').toLowerCase();
+      const itemChapter = Number(item.chapter_num || item.chapter || 0);
+      const itemVerse = Number(item.verse_num || item.verse || 0);
+      const selectedBook = selectedVerseData.bookId.toLowerCase();
+      return (itemBook === selectedBook || itemBook.startsWith(selectedBook.slice(0, 3))) &&
+        itemChapter === Number(selectedVerseData.chapter) &&
+        itemVerse === Number(selectedVerseData.verse);
+    });
+
+    const foreignText = foreignVerse ? cleanVerseText(foreignVerse.text || foreignVerse.verse || '') : '';
+    if (!foreignText) {
+      showToast('找不到這節外文經文');
+      return;
+    }
+
+    if (speechSynthesis.speaking) {
+      speechSynthesis.cancel();
+      speakBtn.textContent = '🔊 朗讀';
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(foreignText);
+    utterance.lang = { id: 'id-ID', en: 'en-US', vi: 'vi-VN' }[selectedLanguage];
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.onstart = () => { speakBtn.textContent = '⏹ 停止朗讀'; };
+    utterance.onend = () => { speakBtn.textContent = '🔊 朗讀'; };
+    utterance.onerror = () => {
+      speakBtn.textContent = '🔊 朗讀';
+      showToast('朗讀失敗，請確認裝置音量');
+    };
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
   });
 
   noteBtn.addEventListener('click', () => {
@@ -715,6 +773,7 @@ function setupDirectSearch() {
               type: 'navigate',
               bookIdx: b.originalIndex,
               chapter: chap,
+              verse: targetVerse,
               title: `📖 直達《${b.name}》第 ${chap} 章${verseSuffix ? ` · 第 ${targetVerse} 節` : ''}`,
               sub: `${b.nameEn} · 全書共 ${b.chapters} 章`
             });
@@ -740,7 +799,7 @@ function setupDirectSearch() {
 
         if (navOptions.length > 0) {
           html += navOptions.map(opt => `
-            <div class="quick-search-item nav-direct-item" data-type="nav" data-book-idx="${opt.bookIdx}" data-chap="${opt.chapter}">
+            <div class="quick-search-item nav-direct-item" data-type="nav" data-book-idx="${opt.bookIdx}" data-chap="${opt.chapter}" data-verse="${opt.verse || ''}">
               <div class="qs-title" style="color: #2E7D32; font-weight: bold;">${opt.title}</div>
               <div class="qs-text" style="color: var(--text-muted);">${opt.sub}</div>
             </div>
@@ -763,7 +822,7 @@ function setupDirectSearch() {
             const highlightedText = text.replaceAll(rawInput, `<mark style="background-color: var(--highlight-bg); color: inherit; border-radius: 2px; padding: 0 2px;">${rawInput}</mark>`);
 
             return `
-              <div class="quick-search-item" data-type="verse" data-book="${item.book}" data-chap="${chapNum}">
+              <div class="quick-search-item" data-type="verse" data-book="${item.book}" data-chap="${chapNum}" data-verse="${verseNum}">
                 <div class="qs-title">${bookObj.name} ${chapNum}:${verseNum}</div>
                 <div class="qs-text">${highlightedText}</div>
               </div>
@@ -776,7 +835,7 @@ function setupDirectSearch() {
         quickSearchResults.querySelectorAll('.quick-search-item').forEach(el => {
           el.addEventListener('click', () => {
             if (el.dataset.type === 'nav') {
-              loadChapter(Number(el.dataset.bookIdx), Number(el.dataset.chap));
+              loadChapter(Number(el.dataset.bookIdx), Number(el.dataset.chap), Number(el.dataset.verse) || null);
             } else {
               const rawBook = String(el.dataset.book || '').toLowerCase().trim();
               const chap = Number(el.dataset.chap);
@@ -785,7 +844,7 @@ function setupDirectSearch() {
                 b.id.toLowerCase().startsWith(rawBook.slice(0, 3)) ||
                 b.name.toLowerCase() === rawBook
               );
-              if (bIdx !== -1) loadChapter(bIdx, chap);
+              if (bIdx !== -1) loadChapter(bIdx, chap, Number(el.dataset.verse) || null);
             }
             quickSearchResults.classList.add('hidden');
             directSearchInput.value = '';
@@ -794,6 +853,17 @@ function setupDirectSearch() {
       }
       quickSearchResults.classList.remove('hidden');
     }, 150);
+  });
+
+  directSearchInput.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+
+    e.preventDefault();
+    directSearchInput.dispatchEvent(new Event('input'));
+    setTimeout(() => {
+      const firstResult = quickSearchResults.querySelector('.quick-search-item');
+      if (firstResult) firstResult.click();
+    }, 180);
   });
 
   document.addEventListener('click', (e) => {
