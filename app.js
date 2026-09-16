@@ -1,11 +1,18 @@
 let booksMeta = [];
 let fullBibleData = [];
 let parallelBibleData = {};
+let parallelBibleIndexes = {};
+const translationUrls = {
+  id: './data/id_tb.json',
+  en: './data/en_kjv.json',
+  vi: './data/vi_1925.json'
+};
+const translationLoaders = {};
 let currentBookIndex = 0;
 let currentChapter = 1;
 
-let highlights = JSON.parse(localStorage.getItem('bible_highlights') || '{}');
-let bibleNotes = JSON.parse(localStorage.getItem('bible_notes') || '{}');
+let highlights = readStoredObject('bible_highlights');
+let bibleNotes = readStoredObject('bible_notes');
 
 let selectedVerseEl = null;
 let selectedVerseData = null;
@@ -37,6 +44,7 @@ const highlightBtn = document.getElementById('highlightBtn');
 const noteBtn = document.getElementById('noteBtn');
 const cardBtn = document.getElementById('cardBtn');
 const speakBtn = document.getElementById('speakBtn');
+const speakChapterBtn = document.getElementById('speakChapterBtn');
 const toast = document.getElementById('toast');
 
 // 筆記 Modal
@@ -59,6 +67,15 @@ const cardCanvas = document.getElementById('cardCanvas');
 const customBgInput = document.getElementById('customBgInput');
 
 // 文字清理工具函式：移除「神」前面的全形/半形空白（傳統挪抬）及開頭結尾空白
+function readStoredObject(key) {
+  try {
+    const value = JSON.parse(localStorage.getItem(key) || '{}');
+    return value && typeof value === 'object' ? value : {};
+  } catch {
+    return {};
+  }
+}
+
 function cleanVerseText(rawText) {
   if (!rawText) return '';
   return String(rawText)
@@ -71,35 +88,78 @@ async function init() {
   try {
     scriptureContent.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 40px 0;">正在載入經文庫...</p>';
 
-    const [booksRes, bibleRes, idRes, enRes, viRes] = await Promise.all([
+    const [booksRes, bibleRes] = await Promise.all([
       fetch('./data/books.json'),
-      fetch('./data/cuv.json'),
-      fetch('./data/id_tb.json'),
-      fetch('./data/en_kjv.json'),
-      fetch('./data/vi_1925.json')
+      fetch('./data/cuv.json')
     ]);
 
     booksMeta = await booksRes.json();
     const rawBible = await bibleRes.json();
     fullBibleData = Array.isArray(rawBible) ? rawBible : (rawBible.verses || Object.values(rawBible).flat());
-    parallelBibleData = {
-      id: await idRes.json(),
-      en: await enRes.json(),
-      vi: await viRes.json()
-    };
-
+    const savedLanguage = localStorage.getItem('bible_language');
+    if (savedLanguage && parallelLangSelector.querySelector(`option[value="${savedLanguage}"]`)) {
+      parallelLangSelector.value = savedLanguage;
+    }
     setupBookSelector();
-    parallelLangSelector.addEventListener('change', () => loadChapter(currentBookIndex, currentChapter));
+    parallelLangSelector.addEventListener('change', async () => {
+      const language = parallelLangSelector.value;
+      localStorage.setItem('bible_language', language);
+      try {
+        await loadTranslation(language);
+        loadChapter(currentBookIndex, currentChapter);
+      } catch (err) {
+        console.error('翻譯載入失敗：', err);
+        showToast('外文載入失敗，請稍後再試');
+      }
+    });
     setupDirectSearch();
     setupVerseActions();
     setupNoteModule();
     setupCardModule();
     setupTheme();
-    loadChapter(0, 1);
+    setupKeyboardNavigation();
+    const savedBook = Number(localStorage.getItem('bible_book'));
+    const savedChapter = Number(localStorage.getItem('bible_chapter'));
+    const initialBook = Number.isInteger(savedBook) && savedBook >= 0 && savedBook < booksMeta.length ? savedBook : 0;
+    const initialChapter = Number.isInteger(savedChapter) && savedChapter > 0 && savedChapter <= booksMeta[initialBook].chapters ? savedChapter : 1;
+    try {
+      await loadTranslation(parallelLangSelector.value);
+    } catch (err) {
+      console.error('初始翻譯載入失敗：', err);
+      parallelLangSelector.value = 'none';
+      localStorage.setItem('bible_language', 'none');
+    }
+    loadChapter(initialBook, initialChapter);
   } catch (err) {
     console.error('載入失敗：', err);
     scriptureContent.innerHTML = '<p style="text-align: center; color: var(--accent);">經文載入失敗，請確認檔案路徑。</p>';
   }
+}
+
+function makeVerseKey(book, chapter, verse) {
+  return `${String(book || '').toUpperCase()}_${Number(chapter)}_${Number(verse)}`;
+}
+
+async function loadTranslation(language) {
+  if (language === 'none' || parallelBibleData[language]) return;
+  if (!translationLoaders[language]) {
+    translationLoaders[language] = fetch(translationUrls[language])
+      .then(response => {
+        if (!response.ok) throw new Error(`翻譯載入失敗：${language}`);
+        return response.json();
+      })
+      .then(rawData => {
+        const verses = Array.isArray(rawData) ? rawData : (rawData.verses || []);
+        parallelBibleData[language] = verses;
+        parallelBibleIndexes[language] = new Map(
+          verses.map(item => [
+            makeVerseKey(item.book, item.chapter_num || item.chapter, item.verse_num || item.verse),
+            item
+          ])
+        );
+      });
+  }
+  await translationLoaders[language];
 }
 
 // 2. 書卷下拉選單
@@ -137,9 +197,12 @@ function updateChapterSelector(totalChapters, selectedChapter) {
 }
 
 // 3. 讀取並渲染章節經文
-function loadChapter(bookIdx, chapNum, verseNum = null) {
+async function loadChapter(bookIdx, chapNum, verseNum = null) {
   currentBookIndex = bookIdx;
   currentChapter = chapNum;
+  localStorage.setItem('bible_book', String(bookIdx));
+  localStorage.setItem('bible_chapter', String(chapNum));
+  stopReading();
   hideToolbar();
 
   const currentBook = booksMeta[currentBookIndex];
@@ -151,8 +214,9 @@ function loadChapter(bookIdx, chapNum, verseNum = null) {
 
   const targetId = currentBook.id.toLowerCase();
   const selectedLanguage = parallelLangSelector.value;
-  const selectedTranslation = parallelBibleData[selectedLanguage] || [];
+  const selectedTranslationIndex = parallelBibleIndexes[selectedLanguage] || new Map();
   speakBtn.classList.toggle('hidden', selectedLanguage === 'none');
+  speakChapterBtn.classList.toggle('hidden', selectedLanguage === 'none');
   document.body.classList.toggle('parallel-mode', selectedLanguage !== 'none');
   const chapterVerses = fullBibleData.filter(item => {
     if (!item) return false;
@@ -166,13 +230,8 @@ function loadChapter(bookIdx, chapNum, verseNum = null) {
       const verseNum = v.verse_num || v.verse || '';
       const text = cleanVerseText(v.verse || v.text || '');
       const verseKey = `${currentBook.id}_${currentChapter}_${verseNum}`;
-      const parallelVerse = selectedTranslation.find(item => {
-        const itemBook = String(item.book || '').toLowerCase();
-        const itemChapter = Number(item.chapter_num || item.chapter || 0);
-        const itemVerse = Number(item.verse_num || item.verse || 0);
-        return (itemBook === targetId || itemBook.startsWith(targetId.slice(0, 3))) &&
-          itemChapter === currentChapter && itemVerse === Number(verseNum);
-      });
+      const parallelVerse = selectedTranslationIndex.get(makeVerseKey(targetId, currentChapter, verseNum)) ||
+        selectedTranslationIndex.get(makeVerseKey(targetId.slice(0, 3), currentChapter, verseNum));
       const parallelText = parallelVerse ? cleanVerseText(parallelVerse.text || parallelVerse.verse || '') : '';
       const isHigh = highlights[verseKey] ? 'highlighted' : '';
       const noteText = bibleNotes[verseKey] || '';
@@ -201,7 +260,13 @@ function loadChapter(bookIdx, chapNum, verseNum = null) {
   if (verseNum) {
     setTimeout(() => {
       const targetVerse = scriptureContent.querySelector(`.verse[data-verse="${verseNum}"]`);
-      targetVerse?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (!targetVerse) {
+        showToast(`找不到第 ${verseNum} 節`);
+        return;
+      }
+      targetVerse.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      targetVerse.classList.add('verse-target');
+      setTimeout(() => targetVerse.classList.remove('verse-target'), 1800);
     }, 250);
   }
 }
@@ -279,16 +344,13 @@ function setupVerseActions() {
       return;
     }
 
-    const selectedTranslation = parallelBibleData[selectedLanguage] || [];
-    const foreignVerse = selectedTranslation.find(item => {
-      const itemBook = String(item.book || '').toLowerCase();
-      const itemChapter = Number(item.chapter_num || item.chapter || 0);
-      const itemVerse = Number(item.verse_num || item.verse || 0);
-      const selectedBook = selectedVerseData.bookId.toLowerCase();
-      return (itemBook === selectedBook || itemBook.startsWith(selectedBook.slice(0, 3))) &&
-        itemChapter === Number(selectedVerseData.chapter) &&
-        itemVerse === Number(selectedVerseData.verse);
-    });
+    const selectedTranslationIndex = parallelBibleIndexes[selectedLanguage] || new Map();
+    const selectedBook = selectedVerseData.bookId.toUpperCase();
+    const foreignVerse = selectedTranslationIndex.get(
+      makeVerseKey(selectedBook, selectedVerseData.chapter, selectedVerseData.verse)
+    ) || selectedTranslationIndex.get(
+      makeVerseKey(selectedBook.slice(0, 3), selectedVerseData.chapter, selectedVerseData.verse)
+    );
 
     const foreignText = foreignVerse ? cleanVerseText(foreignVerse.text || foreignVerse.verse || '') : '';
     if (!foreignText) {
@@ -297,8 +359,7 @@ function setupVerseActions() {
     }
 
     if (speechSynthesis.speaking) {
-      speechSynthesis.cancel();
-      speakBtn.textContent = '🔊 朗讀';
+      stopReading();
       return;
     }
 
@@ -310,6 +371,46 @@ function setupVerseActions() {
     utterance.onend = () => { speakBtn.textContent = '🔊 朗讀'; };
     utterance.onerror = () => {
       speakBtn.textContent = '🔊 朗讀';
+      showToast('朗讀失敗，請確認裝置音量');
+    };
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
+  });
+
+  speakChapterBtn.addEventListener('click', () => {
+    if (!('speechSynthesis' in window)) {
+      showToast('此瀏覽器不支援朗讀功能');
+      return;
+    }
+
+    const selectedLanguage = parallelLangSelector.value;
+    if (selectedLanguage === 'none') {
+      showToast('請先選擇外文版本');
+      return;
+    }
+
+    const chapterText = [...scriptureContent.querySelectorAll('.verse-text-foreign')]
+      .map(element => element.textContent.trim())
+      .filter(Boolean)
+      .join('。 ');
+    if (!chapterText) {
+      showToast('找不到本章外文經文');
+      return;
+    }
+
+    if (speechSynthesis.speaking) {
+      stopReading();
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(chapterText);
+    utterance.lang = { id: 'id-ID', en: 'en-US', vi: 'vi-VN' }[selectedLanguage];
+    utterance.rate = 0.85;
+    utterance.pitch = 1;
+    utterance.onstart = () => { speakChapterBtn.textContent = '⏹ 停止本章朗讀'; };
+    utterance.onend = () => { speakChapterBtn.textContent = '🔊 朗讀本章'; };
+    utterance.onerror = () => {
+      speakChapterBtn.textContent = '🔊 朗讀本章';
       showToast('朗讀失敗，請確認裝置音量');
     };
     speechSynthesis.cancel();
@@ -344,6 +445,12 @@ function hideToolbar() {
   verseToolbar.classList.add('hidden');
   selectedVerseEl = null;
   selectedVerseData = null;
+}
+
+function stopReading() {
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  if (speakBtn) speakBtn.textContent = '🔊 朗讀';
+  if (speakChapterBtn) speakChapterBtn.textContent = '🔊 朗讀本章';
 }
 
 // 5. 筆記模組核心
@@ -737,6 +844,7 @@ function renderCard() {
 // 7. 全能檢索（書卷連打直達 + 全文搜尋）
 function setupDirectSearch() {
   let timer = null;
+  let activeSearchIndex = -1;
 
   directSearchInput.addEventListener('input', (e) => {
     clearTimeout(timer);
@@ -819,7 +927,9 @@ function setupDirectSearch() {
               b.name.toLowerCase() === itemBookStr
             ) || { name: item.book || '經文' };
 
-            const highlightedText = text.replaceAll(rawInput, `<mark style="background-color: var(--highlight-bg); color: inherit; border-radius: 2px; padding: 0 2px;">${rawInput}</mark>`);
+            const safeText = escapeHtml(text);
+            const safeInput = escapeHtml(rawInput);
+            const highlightedText = safeText.replaceAll(safeInput, `<mark style="background-color: var(--highlight-bg); color: inherit; border-radius: 2px; padding: 0 2px;">${safeInput}</mark>`);
 
             return `
               <div class="quick-search-item" data-type="verse" data-book="${item.book}" data-chap="${chapNum}" data-verse="${verseNum}">
@@ -831,6 +941,7 @@ function setupDirectSearch() {
         }
 
         quickSearchResults.innerHTML = html;
+        activeSearchIndex = -1;
 
         quickSearchResults.querySelectorAll('.quick-search-item').forEach(el => {
           el.addEventListener('click', () => {
@@ -856,13 +967,26 @@ function setupDirectSearch() {
   });
 
   directSearchInput.addEventListener('keydown', (e) => {
+    const items = [...quickSearchResults.querySelectorAll('.quick-search-item')];
+
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (items.length === 0) return;
+      e.preventDefault();
+      const direction = e.key === 'ArrowDown' ? 1 : -1;
+      activeSearchIndex = (activeSearchIndex + direction + items.length) % items.length;
+      items.forEach((item, index) => item.classList.toggle('active', index === activeSearchIndex));
+      return;
+    }
+
     if (e.key !== 'Enter') return;
 
     e.preventDefault();
+    const requestedSearchIndex = activeSearchIndex;
     directSearchInput.dispatchEvent(new Event('input'));
     setTimeout(() => {
-      const firstResult = quickSearchResults.querySelector('.quick-search-item');
-      if (firstResult) firstResult.click();
+      const resultItems = [...quickSearchResults.querySelectorAll('.quick-search-item')];
+      const selectedResult = resultItems[requestedSearchIndex] || resultItems[0];
+      if (selectedResult) selectedResult.click();
     }, 180);
   });
 
@@ -881,9 +1005,49 @@ function escapeHtml(text) {
 }
 
 function setupTheme() {
+  if (localStorage.getItem('bible_theme') === 'dark') {
+    document.body.classList.add('dark-theme');
+  }
+
   themeToggleBtn.addEventListener('click', () => {
     document.body.classList.toggle('dark-theme');
+    localStorage.setItem('bible_theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
   });
+}
+
+function setupKeyboardNavigation() {
+  document.addEventListener('keydown', (event) => {
+    const activeElement = document.activeElement;
+    const isTyping = ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElement?.tagName);
+
+    if (event.key === 'Escape') {
+      quickSearchResults.classList.add('hidden');
+      hideToolbar();
+      return;
+    }
+
+    if (isTyping || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.key === 'ArrowLeft' && !prevBtn.disabled) prevBtn.click();
+    if (event.key === 'ArrowRight' && !nextBtn.disabled) nextBtn.click();
+  });
+
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  scriptureContent.addEventListener('touchstart', (event) => {
+    const touch = event.changedTouches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+  }, { passive: true });
+
+  scriptureContent.addEventListener('touchend', (event) => {
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - touchStartX;
+    const deltaY = touch.clientY - touchStartY;
+    if (Math.abs(deltaX) < 70 || Math.abs(deltaX) < Math.abs(deltaY) * 1.3) return;
+    if (deltaX < 0 && !nextBtn.disabled) nextBtn.click();
+    if (deltaX > 0 && !prevBtn.disabled) prevBtn.click();
+  }, { passive: true });
 }
 
 function showToast(msg) {

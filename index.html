@@ -67,6 +67,7 @@
   <!-- 經文浮動工具列 -->
   <div id="verseToolbar" class="verse-toolbar hidden">
     <button id="speakBtn" class="toolbar-btn">🔊 朗讀</button>
+    <button id="speakChapterBtn" class="toolbar-btn">🔊 朗讀本章</button>
     <button id="highlightBtn" class="tb-btn">🖍️ 劃線</button>
     <button id="noteBtn" class="tb-btn">📝 筆記</button>
     <button id="cardBtn" class="tb-btn">🖼️ 製圖</button>
@@ -130,5 +131,10 @@
   <div id="toast" class="toast hidden">已複製金句！</div>
 
   <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+    }
+  </script>
 </body>
 </html>

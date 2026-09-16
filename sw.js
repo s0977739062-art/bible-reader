@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bible-app-v2';
+const CACHE_NAME = 'bible-app-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -6,10 +6,7 @@ const ASSETS_TO_CACHE = [
   './app.js',
   './manifest.json',
   './data/books.json',
-  './data/cuv.json',
-  './data/en_kjv.json',
-  './data/id_tb.json',
-  './data/vi_1925.json'
+  './data/cuv.json'
 ];
 
 self.addEventListener('install', (e) => {
@@ -29,7 +26,15 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request).then(response => response || fetch(e.request))
-  );
+  e.respondWith((async () => {
+    const cachedResponse = await caches.match(e.request);
+    if (cachedResponse) return cachedResponse;
+
+    const networkResponse = await fetch(e.request);
+    if (e.request.url.includes('/data/') && networkResponse.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(e.request, networkResponse.clone());
+    }
+    return networkResponse;
+  })());
 });
