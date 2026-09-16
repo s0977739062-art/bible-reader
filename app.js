@@ -1,5 +1,6 @@
 let booksMeta = [];
 let fullBibleData = [];
+let parallelBibleData = {};
 let currentBookIndex = 0;
 let currentChapter = 1;
 
@@ -25,6 +26,7 @@ const scriptureContent = document.getElementById('scriptureContent');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 const themeToggleBtn = document.getElementById('themeToggleBtn');
+const parallelLangSelector = document.getElementById('parallelLangSelector');
 
 const directSearchInput = document.getElementById('directSearchInput');
 const quickSearchResults = document.getElementById('quickSearchResults');
@@ -32,7 +34,6 @@ const verseToolbar = document.getElementById('verseToolbar');
 const highlightBtn = document.getElementById('highlightBtn');
 const noteBtn = document.getElementById('noteBtn');
 const cardBtn = document.getElementById('cardBtn');
-const copyVerseBtn = document.getElementById('copyVerseBtn');
 const toast = document.getElementById('toast');
 
 // 筆記 Modal
@@ -67,16 +68,25 @@ async function init() {
   try {
     scriptureContent.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 40px 0;">正在載入經文庫...</p>';
 
-    const [booksRes, bibleRes] = await Promise.all([
+    const [booksRes, bibleRes, idRes, enRes, viRes] = await Promise.all([
       fetch('./data/books.json'),
-      fetch('./data/cuv.json')
+      fetch('./data/cuv.json'),
+      fetch('./data/id_tb.json'),
+      fetch('./data/en_kjv.json'),
+      fetch('./data/vi_1925.json')
     ]);
 
     booksMeta = await booksRes.json();
     const rawBible = await bibleRes.json();
     fullBibleData = Array.isArray(rawBible) ? rawBible : (rawBible.verses || Object.values(rawBible).flat());
+    parallelBibleData = {
+      id: await idRes.json(),
+      en: await enRes.json(),
+      vi: await viRes.json()
+    };
 
     setupBookSelector();
+    parallelLangSelector.addEventListener('change', () => loadChapter(currentBookIndex, currentChapter));
     setupDirectSearch();
     setupVerseActions();
     setupNoteModule();
@@ -137,6 +147,9 @@ function loadChapter(bookIdx, chapNum) {
   displayChapterEn.textContent = `${currentBook.nameEn} · Chapter ${currentChapter}`;
 
   const targetId = currentBook.id.toLowerCase();
+  const selectedLanguage = parallelLangSelector.value;
+  const selectedTranslation = parallelBibleData[selectedLanguage] || [];
+  document.body.classList.toggle('parallel-mode', selectedLanguage !== 'none');
   const chapterVerses = fullBibleData.filter(item => {
     if (!item) return false;
     const b = String(item.book || '').toLowerCase();
@@ -149,6 +162,14 @@ function loadChapter(bookIdx, chapNum) {
       const verseNum = v.verse_num || v.verse || '';
       const text = cleanVerseText(v.verse || v.text || '');
       const verseKey = `${currentBook.id}_${currentChapter}_${verseNum}`;
+      const parallelVerse = selectedTranslation.find(item => {
+        const itemBook = String(item.book || '').toLowerCase();
+        const itemChapter = Number(item.chapter_num || item.chapter || 0);
+        const itemVerse = Number(item.verse_num || item.verse || 0);
+        return (itemBook === targetId || itemBook.startsWith(targetId.slice(0, 3))) &&
+          itemChapter === currentChapter && itemVerse === Number(verseNum);
+      });
+      const parallelText = parallelVerse ? cleanVerseText(parallelVerse.text || parallelVerse.verse || '') : '';
       const isHigh = highlights[verseKey] ? 'highlighted' : '';
       const noteText = bibleNotes[verseKey] || '';
 
@@ -157,6 +178,7 @@ function loadChapter(bookIdx, chapNum) {
           <p class="verse ${isHigh}" data-book="${currentBook.name}" data-book-id="${currentBook.id}" data-chapter="${currentChapter}" data-verse="${verseNum}" data-text="${escapeHtml(text)}">
             <span class="verse-num">${verseNum}</span>
             <span class="verse-text">${text}</span>
+            ${parallelText ? `<span class="verse-text-foreign" lang="${selectedLanguage}">${escapeHtml(parallelText)}</span>` : ''}
           </p>
           ${noteText ? `<div class="verse-note-badge" data-key="${verseKey}" data-ref="${currentBook.name} ${currentChapter}:${verseNum}">${escapeHtml(noteText)}</div>` : ''}
         </div>
@@ -230,15 +252,6 @@ function setupVerseActions() {
     }
     localStorage.setItem('bible_highlights', JSON.stringify(highlights));
     hideToolbar();
-  });
-
-  copyVerseBtn.addEventListener('click', () => {
-    if (!selectedVerseData) return;
-    const shareQuote = `「${selectedVerseData.text}」——《聖經》${selectedVerseData.book} ${selectedVerseData.chapter}:${selectedVerseData.verse}`;
-    navigator.clipboard.writeText(shareQuote).then(() => {
-      showToast('已複製金句至剪貼簿！');
-      hideToolbar();
-    });
   });
 
   noteBtn.addEventListener('click', () => {
