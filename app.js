@@ -7,6 +7,17 @@ const translationUrls = {
   en: './data/en_kjv.json',
   vi: './data/vi_1925.json'
 };
+const bibleBookAliases = {
+  JDG: ['JUG'],
+  PSA: ['PSM'],
+  SNG: ['SON'],
+  EZK: ['EZE'],
+  JOL: ['JOE'],
+  MRK: ['MAK'],
+  PHP: ['PHL'],
+  '1TH': ['1TS'],
+  '2TH': ['2TS']
+};
 const translationLoaders = {};
 let currentBookIndex = 0;
 let currentChapter = 1;
@@ -80,7 +91,16 @@ function cleanVerseText(rawText) {
   if (!rawText) return '';
   return String(rawText)
     .replace(/[  \u3000\u00A0]神/g, '神')
+    .replace(/、/g, '，')
     .trim();
+}
+
+function matchesBibleBook(bookCode, bookId) {
+  const sourceId = String(bookCode || '').toUpperCase();
+  const targetId = String(bookId || '').toUpperCase();
+  return sourceId === targetId ||
+    sourceId.startsWith(targetId.slice(0, 3)) ||
+    (bibleBookAliases[targetId] || []).includes(sourceId);
 }
 
 // 1. 初始化
@@ -220,9 +240,8 @@ async function loadChapter(bookIdx, chapNum, verseNum = null) {
   document.body.classList.toggle('parallel-mode', selectedLanguage !== 'none');
   const chapterVerses = fullBibleData.filter(item => {
     if (!item) return false;
-    const b = String(item.book || '').toLowerCase();
     const chap = Number(item.chapter_num || item.chapter || 0);
-    return (b === targetId || b.startsWith(targetId.slice(0, 3))) && chap === currentChapter;
+    return matchesBibleBook(item.book, targetId) && chap === currentChapter;
   });
 
   if (chapterVerses.length > 0) {
@@ -921,9 +940,8 @@ function setupDirectSearch() {
             const verseNum = item.verse_num || item.verse || 1;
             const text = item.cleanedVerseText;
 
-            const bookObj = booksMeta.find(b => 
-              b.id.toLowerCase() === itemBookStr || 
-              b.id.toLowerCase().startsWith(itemBookStr.slice(0, 3)) ||
+            const bookObj = booksMeta.find(b =>
+              matchesBibleBook(itemBookStr, b.id) ||
               b.name.toLowerCase() === itemBookStr
             ) || { name: item.book || '經文' };
 
