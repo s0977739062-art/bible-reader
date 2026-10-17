@@ -92,6 +92,7 @@ function cleanVerseText(rawText) {
   return String(rawText)
     .replace(/[  \u3000\u00A0]神/g, '神')
     .replace(/、/g, '，')
+    .replace(/．/g, '。')
     .trim();
 }
 
